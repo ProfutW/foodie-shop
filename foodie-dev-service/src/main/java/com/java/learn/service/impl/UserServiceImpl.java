@@ -54,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
         // 默认用户昵称同用户名
         user.setNickname(userBo.getUsername());
-        user.setBirthday(DateUtil.stringToDate(customconfi));
+        user.setBirthday(DateUtil.stringToDate(defaultBirth));
         user.setSex(Sex.secret.type);
 
         user.setFace("");

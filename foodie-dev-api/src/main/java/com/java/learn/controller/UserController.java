@@ -95,7 +95,7 @@ public class UserController {
     private Users setNullProperty(Users user) {
         user.setPassword(null);
         user.setRealname(null);
-        user.setsimpleItemList(null);
+//        user.setsimpleItemList(null);
         user.setMobile(null);
         user.setCreatedTime(null);
         user.setUpdatedTime(null);
