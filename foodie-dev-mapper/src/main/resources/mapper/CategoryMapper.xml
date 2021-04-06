@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java.learn.mapper.CategoryMapper" >
+  <resultMap id="BaseResultMap" type="com.java.learn.pojo.Category" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="father_id" property="fatherId" jdbcType="INTEGER" />
+    <result column="logo" property="logo" jdbcType="VARCHAR" />
+    <result column="slogan" property="slogan" jdbcType="VARCHAR" />
+    <result column="cat_image" property="catImage" jdbcType="VARCHAR" />
+    <result column="bg_color" property="bgColor" jdbcType="VARCHAR" />
+  </resultMap>
+
+
+<!--  自定义mapper-->
+
+  <!--  根据一级分类id查询子分类信息-->
+  <resultMap id="categoryVO" type="com.java.learn.pojo.vo.CategoryVO">
+    <id column="id" property="id" />
+    <result column="name" property="name" />
+    <result column="type" property="type" />
+    <result column="fatherId" property="fatherId" />
+
+    <collection property="subCatList" ofType="com.java.learn.pojo.vo.SubCategoryVO">
+      <id column="subId" property="subId" />
+      <result column="subName" property="subName" />
+      <result column="subType" property="subType" />
+      <result column="subFatherId" property="subFatherId" />
+    </collection>
+  </resultMap>
+
+  <select id="getSubCatList" parameterType="int" resultMap="categoryVO">
+    SELECT
+      f.id AS id,
+      f.`name` AS `name`,
+      f.type AS type,
+      f.father_id AS fatherId,
+      c.id AS subId,
+      c.`name` AS subName,
+      c.type AS subType,
+      c.father_id AS subFatherId
+    FROM
+      category AS f
+        LEFT JOIN category AS c ON f.id = c.father_id
+    WHERE
+      f.father_id = #{rootCatId}
+  </select>
+
+  <!--  根据一级分类id查询最新的6个商品作为推荐商品-->
+  <resultMap id="recommendCategoryVO" type="com.java.learn.pojo.vo.RecommendCategoryVO">
+    <id column="rootCatId" property="rootCatId" />
+    <result column="rootCatName" property="rootCatName" />
+    <result column="slogan" property="slogan" />
+    <result column="catImage" property="catImage" />
+    <result column="bgColor" property="bgColor" />
+
+    <collection property="simpleItemList" ofType="com.java.learn.pojo.vo.RecommendItemVO">
+      <id column="itemId" property="itemId" />
+      <result column="itemName" property="itemName" />
+      <result column="itemUrl" property="itemUrl" />
+    </collection>
+  </resultMap>
+
+  <select id="getRecommendItem" parameterType="map" resultMap="recommendCategoryVO">
+    SELECT
+      c.id as rootCatId,
+      c.`name` as rootCatName,
+      c.slogan as slogan,
+      c.cat_image as catImage,
+      c.bg_color as bgColor,
+      i.id as itemId,
+      i.item_name as itemName,
+      ii.url as itemUrl
+    FROM
+      category as c
+        LEFT JOIN
+      items as i
+      ON
+        c.id = i.root_cat_id
+        LEFT JOIN
+      items_img ii
+      ON
+        i.id = ii.item_id
+    WHERE
+      c.type = 1 -- 一级分类
+      AND
+      c.id = #{catMap.rootCatId}
+      AND
+      ii.is_main = 1 -- 选择商品主图
+    ORDER BY
+      ii.created_time
+      DESC
+    LIMIT
+      0, 6
+  </select>
+</mapper>

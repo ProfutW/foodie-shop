@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java.learn.mapper.ItemsSpecMapper" >
+  <resultMap id="BaseResultMap" type="com.java.learn.pojo.ItemsSpec" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="item_id" property="itemId" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="stock" property="stock" jdbcType="INTEGER" />
+    <result column="discounts" property="discounts" jdbcType="DECIMAL" />
+    <result column="price_discount" property="priceDiscount" jdbcType="INTEGER" />
+    <result column="price_normal" property="priceNormal" jdbcType="INTEGER" />
+    <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+    <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+
+
+  <select id="getItemsBySpecIds" parameterType="list" resultType="com.java.learn.pojo.vo.ShopcartVO">
+    SELECT
+      i.id as itemId,
+      i.item_name as itemName,
+      ii.url as itemImgUrl,
+      isp.id as specId,
+      isp.`name` as specName,
+      isp.price_discount as priceDiscount,
+      isp.price_normal as priceNormal
+    FROM
+      items_spec as isp
+        LEFT JOIN
+      items as i
+      ON
+        i.id = isp.item_id
+        LEFT JOIN
+      items_img as ii
+      ON
+        ii.item_id = i.id
+    WHERE
+      ii.is_main = 1
+      AND
+        isp.id IN
+        <foreach collection="paramsList" index="index" item="specId" open="(" close=")" separator=",">
+          #{specId}
+        </foreach>
+  </select>
+
+  <update id="decreaseItemSpecStock">
+
+    update
+        items_spec
+    set
+        stock = stock - #{buyCounts}
+    where
+        id = #{specId}
+    and
+        stock >= #{buyCounts}
+
+  </update>
+</mapper>

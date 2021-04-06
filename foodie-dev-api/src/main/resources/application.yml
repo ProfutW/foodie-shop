@@ -1,0 +1,49 @@
+server:
+  port: 8088
+  max-http-header-size: 80KB
+
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://173.0.20.110:3306/foodie-shop-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect
+    username: vdi_system
+    password: vdi_system
+    hikari:
+      connection-timeout: 30000
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: true
+      idle-timeout: 600000 # 10分钟
+      connection-test-query: select 1
+      max-lifetime: 1800000 # 30分钟
+  servlet:
+    multipart:
+      max-request-size: 2MB
+      max-file-size: 500KB
+
+
+mybatis:
+  type-aliases-package: com.java.learn.pojo
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    # 开启sql日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 通用mapper配置
+mapper:
+  mappers: com.java.learn.my.MyMapper
+  not-empty: false
+  identity: MYSQL
+
+# 分页插件配置
+pagehelper:
+# 这里不需要声明使用的方言，新版本会自动识别数据库，加了反而报错
+#  dialect: mysql
+  support-methods-arguments: true
+
+# 项目内部默认常量设置
+project:
+  config:
+    user:
+      birthday: 1900-01-01

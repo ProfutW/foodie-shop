@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java.learn.mapper.ItemsCommentsMapper" >
+  <resultMap id="BaseResultMap" type="com.java.learn.pojo.ItemsComments" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="item_id" property="itemId" jdbcType="VARCHAR" />
+    <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+    <result column="item_spec_id" property="itemSpecId" jdbcType="VARCHAR" />
+    <result column="spec_name" property="specName" jdbcType="VARCHAR" />
+    <result column="comment_level" property="commentLevel" jdbcType="INTEGER" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+    <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+    <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+
+  <insert id="saveComments" parameterType="Map">
+
+    insert into
+    items_comments
+    (
+    id,
+    user_id,
+    item_id,
+    item_name,
+    item_spec_id,
+    spec_name,
+    comment_level,
+    content,
+    created_time,
+    updated_time
+    )
+    values
+    <foreach collection="commentList" item="item" index="index" separator=",">
+      (
+      #{item.commentId},
+      #{userId},
+      #{item.itemId},
+      #{item.itemName},
+      #{item.itemSpecId},
+      #{item.itemSpecName},
+      #{item.commentLevel},
+      #{item.content},
+      now(),
+      now()
+      )
+    </foreach>
+
+  </insert>
+
+  <resultMap id="myComments" type="com.java.learn.pojo.vo.MyCommentVO">
+    <id column="commentId" property="commentId"/>
+    <result column="content" property="content"/>
+    <result column="createdTime" property="createdTime"/>
+    <result column="itemId" property="itemId"/>
+    <result column="itemName" property="itemName"/>
+    <result column="sepcName" property="specName"/>
+    <result column="itemImg" property="itemImg"/>
+  </resultMap>
+
+  <select id="queryMyComments" parameterType="string" resultMap="myComments">
+    SELECT
+      ic.id as commentId,
+      ic.content as content,
+      ic.created_time as createdTime,
+      ic.item_id as itemId,
+      ic.item_name as itemName,
+      ic.spec_name as sepcName,
+      ii.url as itemImg
+    FROM
+      items_comments ic
+        LEFT JOIN
+      items_img ii
+      ON
+        ic.item_id = ii.item_id
+    WHERE
+      ic.user_id = #{userId}
+      AND
+      ii.is_main = 1
+    ORDER BY
+      ic.created_time
+      desc
+  </select>
+
+
+
+  <select id="getItemComments" resultType="com.java.learn.pojo.vo.ItemCommentsVO" parameterType="map">
+    SELECT
+      ic.comment_level as commentLevel,
+      ic.content as content,
+      ic.spec_name as specName,
+      ic.created_time as createdTime,
+      u.face as userFace,
+      u.nickname as nickName
+    FROM
+      items_comments as ic
+        LEFT JOIN
+      users as u
+      ON
+        ic.user_id = u.id
+    WHERE
+      ic.item_id = #{itemCommentMap.itemId}
+      <if test="itemCommentMap.level != null and itemCommentMap.level != ''">
+        AND ic.comment_level = #{itemCommentMap.level}
+      </if>
+  </select>
+
+
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.java.learn.mapper.ItemsMapper" >
+  <resultMap id="BaseResultMap" type="com.java.learn.pojo.Items" >
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" property="id" jdbcType="VARCHAR" />
+    <result column="item_name" property="itemName" jdbcType="VARCHAR" />
+    <result column="cat_id" property="catId" jdbcType="INTEGER" />
+    <result column="root_cat_id" property="rootCatId" jdbcType="INTEGER" />
+    <result column="sell_counts" property="sellCounts" jdbcType="INTEGER" />
+    <result column="on_off_status" property="onOffStatus" jdbcType="INTEGER" />
+    <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
+    <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+  </resultMap>
+
+
+  <!--  默认排序:根据item_name-->
+  <!--  c:根据销量降序-->
+  <!--  p:根据价格升序-->
+  <select id="searchItem" parameterType="map" resultType="com.java.learn.pojo.vo.SearchItemVO">
+    SELECT
+      i.id as itemId,
+      i.item_name as itemName,
+      i.sell_counts as sellCounts,
+      ii.url as imgUrl,
+      MIN(isp.price_discount) as itemPrice
+    FROM
+      items as i
+        LEFT JOIN
+      items_img as ii
+      ON
+        i.id = ii.item_id
+        LEFT JOIN
+      items_spec as isp
+      ON
+        i.id = isp.item_id
+    WHERE
+      ii.is_main = 1
+    <if test="searchMap.keyword != null and searchMap.keyword != ''">
+      AND i.item_name LIKE '%${searchMap.keyword}%'
+    </if>
+    GROUP BY
+      i.id
+    ORDER BY
+    <choose>
+      <when test='searchMap.sort == "c"'>i.sell_counts DESC</when>
+      <when test='searchMap.sort == "p"'>isp.price_discount ASC</when>
+      <otherwise>i.item_name ASC</otherwise>
+    </choose>
+  </select>
+
+  <select id="searchItemByThirdCat" parameterType="map" resultType="com.java.learn.pojo.vo.SearchItemVO">
+    SELECT
+    i.id as itemId,
+    i.item_name as itemName,
+    i.sell_counts as sellCounts,
+    ii.url as imgUrl,
+    MIN(isp.price_discount) as itemPrice
+    FROM
+    items as i
+    LEFT JOIN
+    items_img as ii
+    ON
+    i.id = ii.item_id
+    LEFT JOIN
+    items_spec as isp
+    ON
+    i.id = isp.item_id
+    WHERE
+    ii.is_main = 1
+    AND i.cat_id = #{searchMap.catId}
+    GROUP BY
+    i.id
+    ORDER BY
+    <choose>
+      <when test='searchMap.sort == "c"'>i.sell_counts DESC</when>
+      <when test='searchMap.sort == "p"'>isp.price_discount ASC</when>
+      <otherwise>i.item_name ASC</otherwise>
+    </choose>
+  </select>
+</mapper>
